@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市更新性格测试</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .intro {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .question-container {
+            background-color: #fff;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+        .option {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option:hover {
+            background-color: #f0f0f0;
+            border-color: #bbb;
+        }
+        .option.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #27ae60;
+        }
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .result-container {
+            display: none;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .result-title {
+            font-size: 24px;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+        .result-icon {
+            font-size: 60px;
+            margin: 20px 0;
+        }
+        .result-desc {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #34495e;
+        }
+        .result-quote {
+            font-style: italic;
+            font-size: 16px;
+            color: #7f8c8d;
+            padding: 15px;
+            border-left: 3px solid #3498db;
+            background-color: #f9f9f9;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 5px;
+            background-color: #ecf0f1;
+            margin-bottom: 20px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>城市更新性格测试</h1>
+        <p class="intro">6道题测你是哪种更新主义者</p>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+
+    <div id="quiz-container">
+        <!-- 问题将通过JavaScript动态生成 -->
+    </div>
+
+    <button id="submit-btn" disabled>查看测试结果</button>
+
+    <div class="result-container" id="result-container">
+        <h2 class="result-title" id="result-title"></h2>
+        <div class="result-icon" id="result-icon"></div>
+        <p class="result-desc" id="result-desc"></p>
+        <p class="result-quote" id="result-quote"></p>
+        <div id="recommendation"></div>
+    </div>
+
+    <script>
+        // 测试数据
+        const questions = [
+            {
+                question: "面对老城衰败街区，你认为最紧迫的行动是？",
+                options: [
+                    { text: "建立'建筑遗产病历卡'，分级诊疗历史建筑", type: "怀旧" },
+                    { text: "部署传感器监测人流/能耗，生成动态更新方案", type: "技术" },
+                    { text: "构建蓝绿廊道，恢复生物迁徙路径", type: "自然" },
+                    { text: "增设社区食堂、托幼中心等便民设施", type: "实用" },
+                    { text: "发起'寄生建筑'计划，让艺术家改造危房", type: "跨界" }
+                ]
+            },
+            {
+                question: "改造一栋80年代筒子楼，你会优先保留？",
+                options: [
+                    { text: "水磨石楼梯与铸铁栏杆的工艺细节", type: "怀旧" },
+                    { text: "混凝土结构体作为未来改造的'数字底座'", type: "技术" },
+                    { text: "楼间野生植被形成的微气候系统", type: "自然" },
+                    { text: "原有户型满足小家庭居住的功能合理性", type: "实用" },
+                    { text: "墙面涂鸦承载的集体记忆符号", type: "跨界" }
+                ]
+            },
+            {
+                question: "设计街角公园时，你会优先考虑？",
+                options: [
+                    { text: "保留原有老树与石阶", type: "怀旧" },
+                    { text: "安装互动投影地面", type: "技术" },
+                    { text: "用本土植物营造野趣", type: "自然" },
+                    { text: "划分明确的健身区与儿童区", type: "实用" },
+                    { text: "邀请市民共创装置艺术", type: "跨界" }
+                ]
+            },
+            {
+                question: "将废弃菜市场改造为文化空间，你会？",
+                options: [
+                    { text: "保留摊档台面作为历史展陈台", type: "怀旧" },
+                    { text: "用AR还原不同年代叫卖场景", type: "技术" },
+                    { text: "利用通风天井引入垂直绿化", type: "自然" },
+                    { text: "改造为标准化共享办公工位", type: "实用" },
+                    { text: "设置'菜场剧场'，每周上演摊贩故事", type: "跨界" }
+                ]
+            },
+            {
+                question: "选择公共艺术装置时，你更看重？",
+                options: [
+                    { text: "复原传统手工艺雕塑", type: "怀旧" },
+                    { text: "AI生成的动态光影矩阵", type: "技术" },
+                    { text: "用回收材料编织生态网", type: "自然" },
+                    { text: "带WiFi和充电功能的座椅", type: "实用" },
+                    { text: "声音交互+气味装置", type: "跨界" }
+                ]
+            },
+            {
+                question: "面对社区更新争议，你的解决思路是？",
+                options: [
+                    { text: "组织老街坊口述历史", type: "怀旧" },
+                    { text: "用数字孪生模拟方案", type: "技术" },
+                    { text: "发起植物认领计划", type: "自然" },
+                    { text: "发起居民需求投票", type: "实用" },
+                    { text: "办一场改造方案摇滚趴", type: "跨界" }
+                ]
+            }
+        ];
+
+        // 结果数据
+        const results = {
+            "怀旧": {
+                title: "怀旧修补派",
+                desc: "历史保护优先",
+                icon: "🧱",
+                quote: "旧时光不是废墟，是地基",
+                symbol: "残砖拼贴心脏"
+            },
+            "技术": {
+                title: "技术革新派",
+                desc: "技术颠覆至上",
+                icon: "💻",
+                quote: "给旧城墙装上神经末梢",
+                symbol: "悬浮数据立方"
+            },
+            "自然": {
+                title: "自然共生派",
+                desc: "生态融合导向",
+                icon: "🌿",
+                quote: "让水泥学会呼吸",
+                symbol: "裂缝中的树苗"
+            },
+            "实用": {
+                title: "社会实用派",
+                desc: "实用主义决策",
+                icon: "⚙️",
+                quote: "人流密度＞情怀浓度",
+                symbol: "齿轮与直尺"
+            },
+            "跨界": {
+                title: "跨界实验派",
+                desc: "多元混搭创新",
+                icon: "🎭",
+                quote: "在废墟上跳踢踏舞",
+                symbol: "破碎万花筒"
+            }
+        };
+
+        // 推荐文章
+        const recommendations = {
+            "怀旧": "《历史建筑保护的十个创新实践》",
+            "技术": "《智慧城市更新中的前沿技术应用》",
+            "自然": "《生态城市：人与自然和谐共生的设计》",
+            "实用": "《以人为本的城市空间改造案例》",
+            "跨界": "《艺术介入城市更新的可能性》"
+        };
+
+        // 初始化变量
+        let currentQuestion = 0;
+        let answers = [];
+        const quizContainer = document.getElementById('quiz-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const resultContainer = document.getElementById('result-container');
+        const progressBar = document.getElementById('progress');
+
+        // 渲染当前问题
+        function renderQuestion() {
+            if (currentQuestion >= questions.length) {
+                return;
+            }
+
+            const q = questions[currentQuestion];
+            let html = `<div class="question-container">
+                <div class="question">${currentQuestion + 1}. ${q.question}</div>
+                <div class="options">`;
+
+            q.options.forEach((option, index) => {
+                html += `<div class="option" data-index="${index}">${option.text}</div>`;
+            });
+
+            html += `</div></div>`;
+            quizContainer.innerHTML = html;
+
+            // 更新进度条
+            progressBar.style.width = `${(currentQuestion / questions.length) * 100}%`;
+
+            // 添加选项点击事件
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', function() {
+                    // 移除之前的选择
+                    document.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // 标记当前选择
+                    this.classList.add('selected');
+                    
+                    // 启用提交按钮
+                    submitBtn.disabled = false;
+                    
+                    // 保存答案
+                    answers[currentQuestion] = q.options[this.dataset.index].type;
+                });
+            });
+        }
+
+        // 提交答案
+        submitBtn.addEventListener('click', function() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+                submitBtn.disabled = true;
+            } else {
+                showResult();
+            }
+        });
+
+        // 显示结果
+        function showResult() {
+            // 计算得分
+            const scores = {
+                "怀旧": 0,
+                "技术": 0,
+                "自然": 0,
+                "实用": 0,
+                "跨界": 0
+            };
+            
+            answers.forEach(answer => {
+                scores[answer] += 2;
+            });
+            
+            // 找出最高分
+            let maxScore = 0;
+            let resultType = "怀旧";
+            
+            for (const type in scores) {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                }
+            }
+            
+            // 显示结果
+            const result = results[resultType];
+            document.getElementById('result-title').textContent = `${result.title}（${result.desc}）`;
+            document.getElementById('result-icon').textContent = result.icon;
+            document.getElementById('result-desc').textContent = `代表符号：${result.symbol}`;
+            document.getElementById('result-quote').textContent = `"${result.quote}"`;
+            
+            // 推荐文章
+            document.getElementById('recommendation').innerHTML = `
+                <p>推荐阅读：<strong>${recommendations[resultType]}</strong></p>
+            `;
+            
+            // 隐藏问题，显示结果
+            quizContainer.style.display = 'none';
+            submitBtn.style.display = 'none';
+            resultContainer.style.display = 'block';
+            progressBar.style.width = '100%';
+        }
+
+        // 开始测试
+        renderQuestion();
+    </script>
+</body>
+</html>
